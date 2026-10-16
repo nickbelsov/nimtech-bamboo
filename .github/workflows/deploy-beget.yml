@@ -27,6 +27,8 @@ jobs:
           test -d assets
 
       - name: Upload website to Beget over FTPS
+        env:
+          NODE_OPTIONS: --tls-max-v1.2
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.BEGET_FTP_SERVER }}
