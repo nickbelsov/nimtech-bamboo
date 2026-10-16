@@ -45,8 +45,10 @@ jobs:
           set ftp:ssl-protect-data yes
           set ftp:passive-mode yes
           set ssl:verify-certificate yes
-          set net:max-retries 2
-          set net:timeout 20
-          mirror --reverse --verbose --only-newer --exclude-glob .git/ --exclude-glob .github/ --exclude-glob README.md --exclude-glob .nojekyll ./ "$FTP_DIRECTORY"
+          set net:max-retries 5
+          set net:reconnect-interval-base 5
+          set net:timeout 45
+          set ftp:ssl-protect-list yes
+          mirror --reverse --verbose --continue --no-perms --only-newer --exclude-glob .git/ --exclude-glob .github/ --exclude-glob README.md --exclude-glob .nojekyll ./ "$FTP_DIRECTORY"
           bye
           LFTP
