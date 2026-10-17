@@ -36,4 +36,17 @@ document.querySelector('#layers').onclick=()=&gt;{setStage(7);layerMode=true;upd
 document.querySelector('#play').onclick=()=&gt;{clearInterval(timer);setStage(0);timer=setInterval(()=&gt;{if(stage===7){clearInterval(timer);return}setStage(stage+1)},1350)};
 function resize(){const w=host.clientWidth,h=host.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)}new ResizeObserver(resize).observe(host);resize();setStage(7);
 function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
-&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe></div></section><footer class="foot" id="contacts"><div><strong>NIMTECH</strong><p>Декоративные панели Bamboo · nimtech.ru</p></div><div class="social"><button onclick="contact('MAX')">✉ Написать в MAX</button><button onclick="contact('Telegram')">✈ Написать в Telegram</button></div></footer><dialog class="modal" id="contactModal"><h3 id="contactTitle"></h3><p>Контактный номер NimTech: <a href="tel:+79770893443">+7 977 089-34-43</a>.</p><p>Прямую ссылку на чат добавим после подтверждения адреса аккаунта в мессенджере.</p><button onclick="document.getElementById('contactModal').close()">Закрыть</button></dialog><script>function contact(name){document.getElementById('contactTitle').textContent='Написать в '+name;document.getElementById('contactModal').showModal()}</script></body></html>
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe></div></section><footer class="foot" id="contacts"><div><strong>NIMTECH</strong><p>Декоративные панели Bamboo · nimtech.ru</p></div><div class="social"><button onclick="contact('MAX')">✉ Написать в MAX</button><button onclick="contact('Telegram')">✈ Написать в Telegram</button></div></footer><dialog class="modal" id="contactModal"><h3 id="contactTitle"></h3><p>Контактный номер NimTech: <a href="tel:+79770893443">+7 977 089-34-43</a>.</p><p>Прямую ссылку на чат добавим после подтверждения адреса аккаунта в мессенджере.</p><button onclick="document.getElementById('contactModal').close()">Закрыть</button></dialog><script>function contact(name){document.getElementById('contactTitle').textContent='Написать в '+name;document.getElementById('contactModal').showModal()}</script><!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=113660532', 'ym');
+
+    ym(113660532, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/113660532" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+</body></html>
