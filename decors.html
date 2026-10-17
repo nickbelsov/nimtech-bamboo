@@ -48,4 +48,17 @@ grid.querySelectorAll('.card').forEach(el=>{let open=()=>show(el.dataset.sku);el
 function show(sku){let x=decors.find(z=>z.sku===sku);document.getElementById('modal-title').textContent=x.name;document.getElementById('gallery').innerHTML=[x.main,x.detail].map((src,i)=>`<img src="${src}" alt="${x.name}: ${i?'крупный план':'общий вид'}">`).join('');document.getElementById('modal-price').textContent=money(x.price);modal.showModal()}
 document.getElementById('close').onclick=()=>modal.close();modal.onclick=e=>{if(e.target===modal)modal.close()};
 search.oninput=render;sort.onchange=render;render();
-</script></body></html>
+</script><!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=113660532', 'ym');
+
+    ym(113660532, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/113660532" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+</body></html>
