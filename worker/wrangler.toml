@@ -5,9 +5,9 @@ compatibility_date = "2026-10-01"
 [vars]
 ALLOWED_ORIGIN = "https://bamboo.nimtech.ru"
 # Set actual amoCRM IDs before deploying:
-AMO_PIPELINE_ID = ""
-AMO_STATUS_ID = ""
-AMO_RESPONSIBLE_USER_ID = ""
+AMO_PIPELINE_ID = "9611890"
+AMO_STATUS_ID = "76760446"
+AMO_RESPONSIBLE_USER_ID = "12949322"
 # AMO_SUBDOMAIN is a secret or variable, e.g. nimtech
 
 # To support automatic OAuth token rotation, create a KV namespace
