@@ -1,0 +1,17 @@
+name = "nimtech-bamboo-leads"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://bamboo.nimtech.ru"
+# Set actual amoCRM IDs before deploying:
+AMO_PIPELINE_ID = ""
+AMO_STATUS_ID = ""
+AMO_RESPONSIBLE_USER_ID = ""
+# AMO_SUBDOMAIN is a secret or variable, e.g. nimtech
+
+# To support automatic OAuth token rotation, create a KV namespace
+# and uncomment the binding with its real namespace ID:
+# [[kv_namespaces]]
+# binding = "TOKENS"
+# id = "YOUR_KV_NAMESPACE_ID"
