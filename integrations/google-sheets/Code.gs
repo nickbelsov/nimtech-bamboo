@@ -7,7 +7,7 @@ function doPost(e) {
     const data = JSON.parse(e.postData.contents || '{}');
     const name = String(data.name || '').trim().slice(0,100);
     const phone = String(data.phone || '').trim().slice(0,30);
-    if (!name || !/^[+0-9()\\s-]{10,30}$/.test(phone) || data.consent !== true) throw Error('Invalid lead');
+    if (!name || !/^[+0-9()\s-]{10,30}$/.test(phone) || data.consent !== true) throw Error('Invalid lead');
     const id = String(data.id || Utilities.getUuid()).slice(0,100);
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Заявки');
     const last = sheet.getLastRow();
