@@ -1,12 +1,25 @@
-// NimTech Bamboo → amoCRM. Deploy with Cloudflare Workers.
-// Required secrets: AMO_SUBDOMAIN, AMO_ACCESS_TOKEN.
-// Optional OAuth refresh: AMO_REFRESH_TOKEN, AMO_CLIENT_ID, AMO_CLIENT_SECRET + KV binding TOKENS.
-// Required vars: AMO_PIPELINE_ID, AMO_STATUS_ID, AMO_RESPONSIBLE_USER_ID, ALLOWED_ORIGIN.
+// NimTech Bamboo → Google Sheets intake. amoCRM sync will be handled later by Apps Script.
+// Deploy this Worker separately using worker/wrangler.toml; GitHub Pages does not deploy Workers.
+const SHEETS_ENDPOINT = "https://script.google.com/macros/s/AKfycbwIJBg8ngWlFnF_jismd5qkkHcaotVkORh1d-rX6Z2WhWtKAiZ1O_KBlzX9g2MOa1II/exec";
 const json=(data,status=200,headers={})=>new Response(JSON.stringify(data),{status,headers:{"Content-Type":"application/json; charset=utf-8",...headers}});
-const headers=(origin,env)=>({"Access-Control-Allow-Origin":origin===env.ALLOWED_ORIGIN?origin:"null","Access-Control-Allow-Methods":"POST, OPTIONS","Access-Control-Allow-Headers":"Content-Type","Vary":"Origin"});
-async function token(env){const stored=env.TOKENS?await env.TOKENS.get("amo_oauth","json"):null;return stored||{access_token:env.AMO_ACCESS_TOKEN,refresh_token:env.AMO_REFRESH_TOKEN};}
-async function refresh(env,old){if(!old.refresh_token||!env.AMO_CLIENT_ID||!env.AMO_CLIENT_SECRET||!env.TOKENS)throw Error("amoCRM token expired; configure OAuth refresh and TOKENS KV");const r=await fetch("https://"+env.AMO_SUBDOMAIN+".amocrm.ru/oauth2/access_token",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({client_id:env.AMO_CLIENT_ID,client_secret:env.AMO_CLIENT_SECRET,grant_type:"refresh_token",refresh_token:old.refresh_token,redirect_uri:env.AMO_REDIRECT_URI||"https://"+env.AMO_SUBDOMAIN+".amocrm.ru"})});if(!r.ok)throw Error("amoCRM token refresh failed "+r.status);const data=await r.json();await env.TOKENS.put("amo_oauth",JSON.stringify({access_token:data.access_token,refresh_token:data.refresh_token}));return data;}
-async function amo(env,path,method="GET",payload){let t=await token(env);const call=()=>fetch("https://"+env.AMO_SUBDOMAIN+".amocrm.ru/api/v4/"+path,{method,headers:{"Authorization":"Bearer "+t.access_token,"Content-Type":"application/json"},body:payload?JSON.stringify(payload):undefined});let r=await call();if(r.status===401){t=await refresh(env,t);r=await call();}if(!r.ok){const msg=await r.text();throw Error("AMO_HTTP_"+r.status+" "+path+" "+msg.slice(0,300));}return r.status===204?{}:r.json();}
-export default {async fetch(request,env){const origin=request.headers.get("Origin")||"";const cors=headers(origin,env);if(request.method==="OPTIONS")return new Response(null,{status:204,headers:cors});if(request.method!=="POST")return json({error:"Method not allowed"},405,cors);if(origin!==env.ALLOWED_ORIGIN)return json({error:"Origin not allowed"},403,cors);if(!env.AMO_SUBDOMAIN||!env.AMO_PIPELINE_ID||!env.AMO_STATUS_ID||!env.AMO_RESPONSIBLE_USER_ID||!env.AMO_ACCESS_TOKEN)return json({error:"Integration not configured"},503,cors);let body;try{body=await request.json()}catch{return json({error:"Invalid JSON"},400,cors)}const name=String(body.name||"").trim().slice(0,100),phone=String(body.phone||"").trim(),note=String(body.note||"").trim(),budget=Number(body.budget);if(!body.consent||name.length<2||!/^[+0-9()\s-]{10,22}$/.test(phone)||!Number.isSafeInteger(budget)||budget<1||budget>100000000||note.length<10||note.length>15000)return json({error:"Invalid form fields"},422,cors);
-let step="create_contact",contactId=null,leadId=null;try{const contactResult=await amo(env,"contacts","POST",[{name,custom_fields_values:[{field_code:"PHONE",values:[{value:phone,enum_code:"WORK"}]}]}]);contactId=contactResult._embedded?.contacts?.[0]?.id;step="create_lead";if(!contactId)throw Error("Contact creation failed");const leadResult=await amo(env,"leads","POST",[{name:"Расчёт Bamboo — "+name,price:budget,pipeline_id:Number(env.AMO_PIPELINE_ID),status_id:Number(env.AMO_STATUS_ID),responsible_user_id:Number(env.AMO_RESPONSIBLE_USER_ID),_embedded:{contacts:[{id:contactId}],tags:[{name:"Бамбук"}]}}]);leadId=leadResult._embedded?.leads?.[0]?.id;step="add_note";if(!leadId)throw Error("Lead creation failed");await amo(env,"leads/"+leadId+"/notes","POST",[{note_type:"common",params:{text:"Расчёт с bamboo.nimtech.ru\nКлиент: "+name+"\nТелефон: "+phone+"\nБюджет: "+budget+" ₽\n\n"+note}}]);return json({ok:true},200,cors)}catch(error){console.error("Bamboo CRM submission error",step,error.message);const status=/AMO_HTTP_(\d+)/.exec(error.message);return json({error:"CRM submission failed",step,upstream_status:status?Number(status[1]):null,partial:!!contactId,lead_created:!!leadId},502,cors)}
+const cors=(origin,env)=>({"Access-Control-Allow-Origin":origin===(env.ALLOWED_ORIGIN||"https://bamboo.nimtech.ru")?origin:"null","Access-Control-Allow-Methods":"POST, OPTIONS","Access-Control-Allow-Headers":"Content-Type","Vary":"Origin"});
+export default {async fetch(request,env){
+  const origin=request.headers.get("Origin")||"";
+  const headers=cors(origin,env);
+  if(request.method==="OPTIONS")return new Response(null,{status:204,headers});
+  if(request.method!=="POST")return json({error:"Method not allowed"},405,headers);
+  if(headers["Access-Control-Allow-Origin"]==="null")return json({error:"Origin not allowed"},403,headers);
+  let body;try{body=await request.json()}catch{return json({error:"Invalid JSON"},400,headers)}
+  const name=String(body.name||"").trim(),phone=String(body.phone||"").trim(),budget=Number(body.budget);
+  if(name.length<2||name.length>100||!/^[+0-9()\\s-]{10,30}$/.test(phone)||body.consent!==true||!Number.isFinite(budget)||budget<0||budget>100000000)return json({error:"Invalid form fields"},422,headers);
+  const id=String(body.id||crypto.randomUUID());
+  const page=String(body.page||body.source||"https://bamboo.nimtech.ru/");
+  const payload={...body,id,name,phone,form:body.form|| (page.includes("/calculator/")?"calculator":"homepage_calculator"),page,calculator:{budget,note:body.note||"",specification:body.note||""},utm_source:body.utm_source||"",utm_medium:body.utm_medium||"",utm_campaign:body.utm_campaign||"",utm_content:body.utm_content||"",utm_term:body.utm_term||""};
+  try{
+    const response=await fetch(SHEETS_ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),redirect:"follow"});
+    if(!response.ok)throw Error("Sheets HTTP "+response.status);
+    const result=await response.json();
+    if(result.ok!==true)throw Error("Sheets rejected lead");
+    return json({ok:true,id:result.id||id},200,headers);
+  }catch(error){console.error("Bamboo Sheets intake error",error);return json({error:"Lead storage failed"},502,headers)}
 }};
