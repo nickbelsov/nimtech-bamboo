@@ -50,6 +50,6 @@ form.addEventListener('submit',async e=>{e.preventDefault();if(!valid(phone.valu
 const send=form.querySelector('button[type=submit]');send.disabled=true;status.textContent='Передаём заявку…';
 const qs=new URLSearchParams(location.search);
 const payload={id:crypto.randomUUID(),name:overlay.querySelector('#nt-capture-name').value.trim()||'Без имени',phone:phone.value,form:'quick_callback',source:'bamboo.nimtech.ru',tag:'Бамбук',pipeline:'Объекты',page:location.href,first_page:sessionStorage.getItem('nimtech_first_page')||location.href,referrer:document.referrer,utm_source:qs.get('utm_source')||'',utm_medium:qs.get('utm_medium')||'',utm_campaign:qs.get('utm_campaign')||'',utm_content:qs.get('utm_content')||'',utm_term:qs.get('utm_term')||'',consent:true};
-try{await fetch(endpoint,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});status.textContent='Запрос передан. Мы свяжемся с вами.';form.reset()}catch(err){status.textContent='Не удалось отправить заявку. Попробуйте позже.'}finally{send.disabled=false}
+try{await fetch(endpoint,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:AbortSignal.timeout(12000)});form.reset();window.location.assign('/thank-you/')}catch(err){status.textContent='Не удалось подтвердить отправку. Попробуйте ещё раз или позвоните нам.'}finally{send.disabled=false}
 });
 })();
