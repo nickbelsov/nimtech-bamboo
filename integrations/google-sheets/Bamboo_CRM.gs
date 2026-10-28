@@ -45,15 +45,16 @@ function syncBambooLeads(){
     // Search existing contacts to avoid duplicate contacts.
     const contacts=bambooAmo_('get','contacts?query='+encodeURIComponent(phone)+'&limit=50');
     const existing=(contacts._embedded&&contacts._embedded.contacts||[]).find(c=>(c.custom_fields_values||[]).some(f=>f.field_code==='PHONE'&&(f.values||[]).some(v=>bambooPhone_(v.value)===phone)));
-    let contactId=existing&&existing.id;
+    let contactId=Number(r[23])||(existing&&existing.id);
     if(!contactId){
      const created=bambooAmo_('post','contacts',[{name:name&&name!=='Без имени'?name:'Клиент Bamboo',responsible_user_id:BAMBOO_CRM.manager,custom_fields_values:[{field_code:'PHONE',values:[{value:'+'+phone,enum_code:'WORK'}]}]}]);
      contactId=created._embedded.contacts[0].id;
     }
     // Persist contact ID before creating lead, to support recovery.
     sheet.getRange(row,24).setValue(contactId);
-    const leads=bambooAmo_('post','leads',[{name:leadName,pipeline_id:BAMBOO_CRM.pipeline,status_id:BAMBOO_CRM.status,responsible_user_id:BAMBOO_CRM.manager,_embedded:{tags:[{name:BAMBOO_CRM.tag}],contacts:[{id:contactId}]}}]);
-    const leadId=leads._embedded.leads[0].id;
+    const existingLeadId=Number(r[22]);
+    const leads=existingLeadId?null:bambooAmo_('post','leads',[{name:leadName,pipeline_id:BAMBOO_CRM.pipeline,status_id:BAMBOO_CRM.status,responsible_user_id:BAMBOO_CRM.manager,_embedded:{tags:[{name:BAMBOO_CRM.tag}],contacts:[{id:contactId}]}}]);
+    const leadId=existingLeadId||(leads._embedded.leads[0].id);
     sheet.getRange(row,23).setValue(leadId);
     // Once lead ID is persisted, subsequent failures can retry the note only.
     try{bambooAmo_('post','leads/'+leadId+'/notes',[{note_type:'common',params:{text:bambooNote_(r)}}]);}
@@ -73,4 +74,13 @@ function installBambooSyncTrigger(){
  if(!props.getProperty('AMO_ACCESS_TOKEN'))throw Error('Set AMO_ACCESS_TOKEN in Script Properties first');
  ScriptApp.getProjectTriggers().filter(t=>t.getHandlerFunction()==='syncBambooLeads').forEach(ScriptApp.deleteTrigger);
  ScriptApp.newTrigger('syncBambooLeads').timeBased().everyMinutes(1).create();
+}
+
+/** Read-only credential check. Does NOT create contacts or leads. */
+function testBambooAmoConnection(){
+ const account=bambooAmo_('get','account');
+ const pipeline=bambooAmo_('get','leads/pipelines/'+BAMBOO_CRM.pipeline);
+ const stage=(pipeline._embedded&&pipeline._embedded.statuses||[]).find(s=>s.id===BAMBOO_CRM.status);
+ if(!stage)throw Error('Target stage '+BAMBOO_CRM.status+' is not in pipeline');
+ Logger.log('amoCRM connection OK; account='+account.name+'; pipeline='+pipeline.name+'; stage='+stage.name);
 }
