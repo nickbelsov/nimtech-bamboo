@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /showroom-original.html
-Disallow: /montage-3d.html
-Sitemap: https://bamboo.nimtech.ru/sitemap.xml
