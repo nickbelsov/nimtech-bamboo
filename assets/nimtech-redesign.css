@@ -52,3 +52,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,
 @media(max-width:1050px){header{gap:12px!important}.wrap{padding-top:65px;padding-bottom:65px}.nt-hero-copy{padding-top:65px!important;padding-bottom:42px!important}}
 @media(max-width:600px){body{overflow-x:hidden}.wrap{padding:52px 18px!important}.wrap h2{font-size:clamp(30px,8vw,43px)!important}header{padding:11px 15px!important}header nav{gap:13px!important}.nt-hero-copy{padding:45px 20px 32px!important}.nt-hero-copy h1{font-size:clamp(38px,10vw,52px)!important}.nt-hero-copy .buttons .btn{font-size:14px!important;padding:16px!important}.feature,.install-stage,.panel{border-radius:17px!important}.nt-hero-static img{object-position:55% center}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.feature,.install-stage{transition:none!important}.btn::after,button[type=submit]::after,.nt-capture-submit::after{animation:none!important}}
+
+/* Header contrast fix: all templates, including product cards with inline !important styles. */
+html body>header,html body header:not(.article-header){background:#fff!important;color:#17242d!important;border-bottom:1px solid #e4e9ef!important}
+html body>header .logo,html body>header .logo-mark,html body>header .logo-mark span,html body>header .brand-text,html body>header strong,html body>header .header-phone,html body>header .header-phone a,html body>header a:not(.btn):not(.social a){color:#17242d!important}
+html body>header .logo-caption,html body>header .brand-text small{color:#53616c!important;opacity:1!important}
+html body>header nav a,html body>header nav a:visited{color:#26343d!important}
+html body>header .social a,html body>header .social a:visited{color:#17242d!important;background:#fff!important;border-color:#d9dfe5!important}
+html body>header .social svg{color:#17242d!important}
+html body>header .logo svg{opacity:1!important}
